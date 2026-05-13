@@ -14,7 +14,7 @@ import (
 
 // Estrutura esperada do JSON vindo do mqtt-sub
 type CustomPayload struct {
-	FazendaID 	string      	`json:"fazendaId"`
+	UserId     	string      	`json:"userId"`
 	DeviceType 	string     		`json:"deviceType"`
 	DeviceID  	string     		`json:"deviceId"`
 	Payload   	interface{} 	`json:"payload"`
@@ -89,16 +89,25 @@ func main() {
 			fields["value"] = payload
 		}
 
+
+		// extraio o timestamp do payload e tiro ele dos fields (se existir), senão uso o timestamp atual
+		timestamp := time.Now().Unix()
+
+		if ts, ok := fields["timestamp"].(float64); ok {
+			timestamp = int64(ts)
+			delete(fields, "timestamp")
+		}
+
 		// CRIA POINT (nome da tabela)
 		p := influxdb2.NewPoint(
 			"telemetria",
 			map[string]string{
-				"sensorId":   data.DeviceID,
+				"deviceId":   data.DeviceID,
 				"deviceType": data.DeviceType,
-				"fazendaId":  data.FazendaID,
+				"userId":  data.UserId,
 			},
 			fields,
-			time.Now(),
+			time.Unix(timestamp, 0),
 		)
 
 		// ESCREVE NO INFLUX

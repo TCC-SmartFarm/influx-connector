@@ -1,0 +1,14 @@
+services:
+  influx-connector:
+    build:
+      context: .
+    container_name: influx-connector
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - smartfarm-network
+
+networks:
+  smartfarm-network:
+    external: true
