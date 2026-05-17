@@ -48,7 +48,7 @@ func main() {
 
 	msgs, err := ch.Consume(
 		"fila_influx", // Nome da fila que o barramento de eventos deve enviar os dados
-		"",           // consumer
+		"influx-connector",           // consumer
 		true, false, false, false, nil,
 	)
 
