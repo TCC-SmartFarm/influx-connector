@@ -17,6 +17,7 @@ type CustomPayload struct {
 	UserId     	string      	`json:"userId"`
 	DeviceType 	string     		`json:"deviceType"`
 	DeviceID  	string     		`json:"deviceId"`
+	Name		string			`json:"name"`
 	Payload   	interface{} 	`json:"payload"`
 }
 
@@ -98,6 +99,11 @@ func main() {
 			delete(fields, "timestamp")
 		}
 
+		// Remove 'name' dos fields para evitar conflito com a Tag
+		delete(fields, "name")
+
+		log.Printf("Recebido para Influx | Sensor: %s | Fields: %v | Name: %s\n", data.DeviceID, fields, data.Name)
+
 		// CRIA POINT (nome da tabela)
 		p := influxdb2.NewPoint(
 			"telemetria",
@@ -105,6 +111,7 @@ func main() {
 				"deviceId":   data.DeviceID,
 				"deviceType": data.DeviceType,
 				"userId":  data.UserId,
+				"name": data.Name,
 			},
 			fields,
 			time.Unix(timestamp, 0),
@@ -117,6 +124,6 @@ func main() {
 			continue
 		}
 
-		fmt.Printf("Gravado | Sensor: %s | Fields: %v\n", data.DeviceID, fields)
+		log.Printf("Gravado | Sensor: %s | Fields: %v | Name: %s\n", data.DeviceID, fields, data.Name)
 	}
 }
