@@ -47,11 +47,26 @@ func main() {
 	}
 	defer ch.Close()
 
+	_, err = ch.QueueDeclare(
+		"fila_influx",
+		true,  // durable
+		false, // auto-delete
+		false, // exclusive
+		false, // no-wait
+		nil,
+	)
+	if err != nil {
+		log.Fatal("Falha ao declarar fila:", err)
+	}
+
 	msgs, err := ch.Consume(
-		"fila_influx", // Nome da fila que o barramento de eventos deve enviar os dados
-		"influx-connector",           // consumer
+		"fila_influx",
+		"influx-connector",
 		true, false, false, false, nil,
 	)
+	if err != nil {
+		log.Fatal("Falha ao consumir fila:", err)
+	}
 
 	fmt.Println("Conectado! Aguardando dados para o InfluxDB Cloud...")
 
