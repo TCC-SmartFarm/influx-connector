@@ -14,10 +14,12 @@ import (
 
 // Estrutura esperada do JSON vindo do mqtt-sub
 type CustomPayload struct {
-	UserId     	string      	`json:"userId"`
-	DeviceType 	string     		`json:"deviceType"`
-	DeviceID  	string     		`json:"deviceId"`
-	Name		string			`json:"name"`
+	UserId          string      `json:"userId"`
+	ApplicationId   string      `json:"applicationId"`
+	DeviceType      string     	`json:"deviceType"`
+	DevAddr         string     	`json:"devAddr"`
+	DevEUI        	string		`json:"devEUI"`
+	Name            string		`json:"name"`
 	Payload   	interface{} 	`json:"payload"`
 }
 
@@ -114,19 +116,21 @@ func main() {
 			delete(fields, "timestamp")
 		}
 
-		// Remove 'name' dos fields para evitar conflito com a Tag
-		delete(fields, "name")
+		// Remove 'devEUI' dos fields para evitar conflito com a Tag
+		delete(fields, "devEUI")
 
-		log.Printf("Recebido para Influx | Sensor: %s | Fields: %v | Name: %s\n", data.DeviceID, fields, data.Name)
+		log.Printf("Recebido para Influx UserId: %s | Sensor: %s | Fields: %v | DevEUI: %s\n", data.UserId, data.DevAddr, fields, data.DevEUI)
 
 		// CRIA POINT (nome da tabela)
 		p := influxdb2.NewPoint(
 			"telemetria",
 			map[string]string{
-				"deviceId":   data.DeviceID,
+				"userId":     data.UserId,
+				"devAddr":    data.DevAddr,
 				"deviceType": data.DeviceType,
-				"userId":  data.UserId,
-				"name": data.Name,
+				"applicationId": data.ApplicationId,
+				"devEUI":    data.DevEUI,
+				"name":      data.Name,
 			},
 			fields,
 			time.Unix(timestamp, 0),
@@ -139,6 +143,6 @@ func main() {
 			continue
 		}
 
-		log.Printf("Gravado | Sensor: %s | Fields: %v | Name: %s\n", data.DeviceID, fields, data.Name)
+		log.Printf("Gravado | timestamp: %d | Name: %s | Sensor: %s | Fields: %v | DevEUI: %s\n", timestamp, data.Name, data.DevAddr, fields, data.DevEUI)
 	}
 }
